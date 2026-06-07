@@ -1,0 +1,193 @@
+# Clinical Cohort AI System - Complete Project Documentation
+
+This document provides an in-depth explanation of the "Clinical Cohort AI System" project. It covers the models used, the API architecture, the inner workings of the website, the frontend implementation, the agentic backend design, and a detailed code walkthrough.
+
+---
+
+## 1. Overview and How Things are Connected
+
+The system is an Agentic AI platform designed for clinical cohort analysis. It allows users to upload clinical patient datasets (in CSV format) and automatically cleans, analyzes, and extracts clinical insights from the data using both rule-based algorithms and LLMs (Large Language Models).
+
+### High-Level Architecture
+1. **Frontend (React + Vite + TailwindCSS):** 
+   - A single-page application where users can upload their clinical data (CSV).
+   - Once uploaded, it displays a dashboard allowing users to filter patients (creating "cohorts") based on conditions, medications, outcomes, and age groups.
+   - It visualizes key statistics like Cohort Size, Average Age, Average BMI, and a tabular view of the filtered patients.
+
+2. **Backend (FastAPI + Python):**
+   - The backend acts as the orchestrator. It exposes RESTful APIs to the frontend.
+   - It maintains an in-memory session store so that an uploaded dataset is available across multiple API requests using a `session_id`.
+
+3. **Agents (The "Brain"):**
+   - Instead of monolithic logic, the backend uses a modular "Agent" architecture. Each agent has a specific responsibility (e.g., Data Cleaning, Cohort Analysis, AI Q&A, AI Insights).
+
+### The Data Flow
+1. User uploads a CSV via the Frontend.
+2. The Frontend hits `POST /api/upload/`.
+3. The Backend passes the CSV to the `DataCleaningAgent`. The agent cleans the data (fills missing values, etc.).
+4. The cleaned data is saved in memory (`session_store.py`) and a `session_id` is returned.
+5. Frontend requests filter options (diseases, medications, outcomes) using `GET /api/cohort/...`.
+6. User selects filters and clicks "Filter Patient Population".
+7. Frontend calls `POST /api/cohort/create`.
+8. Backend passes the filters to the `CohortAnalysisAgent`, which filters the Pandas DataFrame, computes statistics, and returns the cohort data.
+9. Frontend renders the results on the dashboard.
+10. Advanced AI capabilities (like Insights and Q&A) use OpenAI's GPT models via `InsightAgent` and `QAAgent`.
+
+---
+
+## 2. The Model Used
+
+The project uses **OpenAI's LLMs** (Large Language Models) for generating intelligent insights and answering natural language questions about the dataset.
+
+- **Primary Model:** `gpt-4o-mini` (configurable via the `.env` file using the `OPENAI_MODEL` variable).
+- **Fallback Mechanism:** The application is designed to be robust. If no `OPENAI_API_KEY` is provided, the agents (like `InsightAgent` and `QAAgent`) gracefully fall back to rule-based logic (e.g., keyword matching for Q&A, standard text generation for insights).
+
+---
+
+## 3. The Agents (In-Depth)
+
+The core logic of the backend is divided into four distinct agents located in the `backend/agents/` folder:
+
+### A. DataCleaningAgent (`cleaning_agent.py`)
+- **Responsibility:** Ensure the uploaded CSV is clean and usable.
+- **How it works:**
+  - Identifies missing values.
+  - For numeric columns (age, BMI, blood sugar), it fills missing values using the **median** (robust to outliers).
+  - For categorical columns, it fills missing values using the **mode** (most frequent value).
+  - Returns a clean Pandas DataFrame and a report of what was fixed.
+
+### B. CohortAnalysisAgent (`cohort_agent.py`)
+- **Responsibility:** Filter data, calculate aggregate statistics, and perform clinical risk stratification.
+- **How it works:**
+  - Takes criteria like `disease`, `age_group`, `medication`, and `outcome`.
+  - Filters the Pandas DataFrame based on these criteria.
+  - **Risk Scoring:** Dynamically calculates a risk score (0-10) for every patient based on age, BMI, glucose, and outcomes.
+  - Returns patient records with added `risk_level` (Critical, High, Moderate, Low) and `risk_factors`.
+
+### C. InsightAgent (`insight_agent.py`)
+- **Responsibility:** Generate actionable clinical recommendations and identify high-risk patients.
+- **How it works:**
+  - Computes summary stats and generates a high-fidelity executive summary.
+  - Provides bulleted insights and clinical recommendations.
+
+### D. ProtocolAgent (`protocol_agent.py`) - **NEW**
+- **Responsibility:** Act as a Clinical Research Scientist to validate cohorts against medical standards.
+- **How it works:**
+  - Assesses if current medications align with the primary pathology.
+  - Generates a Protocol Alignment Score and provides reasoning for clinical deviations.
+  - Suggests research hypotheses for further investigation.
+
+### E. QAAgent (`qa_agent.py`)
+- **Responsibility:** Answer plain-English questions about the data.
+- **How it works:**
+  - Builds a string "context" summarizing the dataset (total rows, columns, mean values, top distributions).
+  - Prompts the LLM with this context and the user's question, asking for a concise answer.
+  - If no API key is present, uses `_keyword_answer` (e.g., if the question contains "average age", it calculates `df['age'].mean()`).
+
+---
+
+## 4. The API (Backend Endpoints)
+
+Built with **FastAPI**, the backend exposes several routers (`backend/api/`):
+
+1. **Upload API (`upload.py`)**
+   - `POST /api/upload/`: Receives the CSV file, runs `DataCleaningAgent`, generates a UUID `session_id`, stores the DataFrame in the session store, and returns the session_id to the frontend.
+   - `GET /api/upload/sample`: Loads a pre-existing `sample_patients.csv` (useful for testing without uploading).
+
+2. **Cohort API (`cohort.py`)**
+   - `GET /api/cohort/diseases/{session_id}`: Returns a list of unique diseases in the dataset.
+   - `GET /api/cohort/medications/{session_id}`: Returns unique medications.
+   - `GET /api/cohort/outcomes/{session_id}`: Returns unique outcomes.
+   - `POST /api/cohort/create`: Receives filter parameters, runs the `CohortAnalysisAgent`, and returns the filtered patients and statistics.
+
+3. **Agent API (`agent.py`)**
+   - `POST /api/agent/ask`: Receives a `session_id` and a `question` string. Uses `QAAgent` to answer.
+
+4. **Insights API (`insights.py`)**
+   - `POST /api/insights/generate`: Runs the `InsightAgent` to get AI-generated insights for a cohort.
+
+---
+
+## 5. The Frontend
+
+The frontend is a modern React application built with Vite and TailwindCSS (`frontend/src/`).
+
+- **Styling:** Uses TailwindCSS for utility-first styling, providing a clean, modern, and responsive UI. The `index.css` defines base CSS variables and custom classes like `.btn-primary` and `.card`.
+- **Icons:** Uses `lucide-react` for beautiful, consistent iconography.
+- **Main Components:**
+  - `App.tsx`: The root component. Handles the file upload state. If no file is uploaded, it shows an upload drag-and-drop UI. Once uploaded, it renders the `CohortAnalysis` dashboard.
+  - `CohortAnalysis.tsx`: The main interactive dashboard.
+    - **Initialization:** On mount, it fetches the available diseases, medications, and outcomes using the `GET` APIs to populate the dropdown filters.
+    - **Interaction:** User selects filters and clicks "Filter Patient Population".
+    - **Data Display:** It displays the resulting statistics (Total Patients, Avg Age, Avg BMI) in styled cards and renders a table showing the top 10 matching patient records.
+- **Vite Configuration:** `vite.config.ts` includes a proxy so that any request to `/api` is automatically forwarded to the backend running on `localhost:8000`.
+
+---
+
+## 6. Code Walkthrough (Key Files)
+
+### Backend
+
+- **`backend/main.py`**: The entry point. Initializes FastAPI, sets up CORS (so the frontend on port 5173 can talk to it), ensures the upload directory exists, and mounts all the API routers.
+- **`backend/utils/session_store.py`**: A simple in-memory dictionary (`_store`) mapping `session_id` to Pandas DataFrames. In a real production app, this would be replaced by Redis or a database.
+- **`backend/models/schemas.py`**: Pydantic models. These define the exact shape of the JSON data coming in and going out of the APIs. For example, `CohortResult` strictly defines that a response must have `cohort_name`, `total_patients`, etc.
+- **`backend/data/sample_patients.csv`**: A mock dataset of 40 patients with various conditions (Diabetes, Asthma, COPD), medications, and vitals, used for testing.
+
+### Frontend
+
+- **`frontend/src/App.tsx`**: 
+  - Uses `useState` to track the `file` and `session`.
+  - `handleUpload` function uses `FormData` to send the CSV to the backend via `fetch()`.
+  - Conditional rendering: Shows upload screen if `!session`, else shows `CohortAnalysis`.
+- **`frontend/src/components/CohortAnalysis.tsx`**:
+  - Manages states for all dropdown selections (`selectedDisease`, `selectedAgeGroup`, etc.).
+  - `handleCreateCohort` posts the selected filters to the backend.
+  - Uses Tailwind utility classes to render the data in a highly polished, aesthetic dashboard.
+
+## 7. Step-by-Step Execution Sequence (Workflow)
+
+Here is the exact chronological flow of data and operations when a user interacts with the system:
+
+### Phase 1: Data Ingestion & Cleaning
+1. **User Action:** The user selects a `.csv` file on the frontend and clicks "Begin Analysis".
+2. **Frontend Request:** `App.tsx` sends a `multipart/form-data` POST request containing the file to `/api/upload/`.
+3. **Backend Parsing:** The `upload_csv` endpoint in `api/upload.py` reads the file bytes and converts it into a raw Pandas DataFrame.
+4. **Agent Intervention (Cleaning):** The raw DataFrame is passed to `DataCleaningAgent.run()`.
+   - The agent scans for missing values.
+   - It replaces missing numeric values (e.g., age, BMI) with the column's **median**.
+   - It replaces missing categorical values (e.g., disease, gender) with the column's **mode**.
+5. **Session Storage:** A unique UUID (`session_id`) is generated. The cleaned DataFrame is saved in RAM via `utils/session_store.py` mapped to this ID.
+6. **Response:** The backend returns the `session_id`, number of rows, columns, and a missing value summary to the frontend.
+
+### Phase 2: Dashboard Initialization
+7. **Frontend State Update:** The React app receives the `session_id` and switches the view from the upload screen to the `CohortAnalysis` dashboard.
+8. **Fetching Filters:** Immediately upon mounting, `CohortAnalysis.tsx` fires three parallel GET requests:
+   - `/api/cohort/diseases/{session_id}`
+   - `/api/cohort/medications/{session_id}`
+   - `/api/cohort/outcomes/{session_id}`
+9. **Backend Processing:** Each of these endpoints (`api/cohort.py`) retrieves the session DataFrame, extracts unique non-null values for the respective columns, sorts them, and returns them to populate the dropdown menus on the UI.
+
+### Phase 3: Cohort Filtering & Analysis
+10. **User Action:** The user selects specific filters (e.g., Disease: Diabetes, Age: Adult) and clicks "Filter Patient Population".
+11. **Frontend Request:** A POST request is sent to `/api/cohort/create` with a JSON payload of the selected filters and the `session_id`.
+12. **Agent Intervention (Analysis):** The endpoint passes the filters to `CohortAnalysisAgent.run()`.
+    - The agent takes the cleaned DataFrame and sequentially applies pandas boolean masking to filter down the rows based on the user's criteria.
+    - It then passes the filtered subset to `_compute_stats()` to calculate the average age, average BMI, outcome distributions, etc.
+13. **Response:** The backend returns the filtered list of patients (limited to top 10 for UI display) and the computed statistics.
+14. **Frontend Render:** The dashboard updates the stat cards (Cohort Size, Avg Age, Avg BMI) and renders the filtered patients in the data table.
+
+### Phase 4: AI Insights & Q&A (Optional Flow)
+15. **User Action:** (If implemented in UI) User requests deeper insights or asks a question.
+16. **Agent Intervention (Insights):** A POST request to `/api/insights/generate` triggers the `InsightAgent`.
+    - It aggregates basic stats and flags risky patients (e.g., BMI > 30).
+    - It bundles this data into a prompt and calls the OpenAI API to generate an executive summary, insights, and recommendations.
+    - If the API key is missing, it falls back to hardcoded string generation.
+17. **Agent Intervention (Q&A):** A POST request to `/api/agent/ask` triggers the `QAAgent`.
+    - It builds a text context of the dataset's distributions.
+    - It prompts OpenAI to answer the specific question based *only* on the context.
+    - If no API key is present, it uses Regex/keyword rules (e.g., spotting "average age") to calculate the answer manually.
+
+---
+
+## Summary
+The project is a tightly integrated Full-Stack AI application. It demonstrates how to combine robust data manipulation (Pandas) with Agentic patterns (LLM wrappers with rule-based fallbacks) exposed via a fast modern API (FastAPI), all consumed by a highly interactive and aesthetically pleasing React frontend.

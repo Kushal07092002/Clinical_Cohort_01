@@ -1,0 +1,41 @@
+patient_id,age,gender,disease,medication,dosage_mg,treatment_duration_days,outcome,blood_pressure,cholesterol,blood_sugar,bmi,smoking,alcohol_use,exercise_frequency
+P001,45,Male,Diabetes,Metformin,500,180,Improved,130/85,210,145,27.5,No,Occasional,3
+P002,67,Female,Hypertension,Lisinopril,10,365,Stable,145/92,,180,31.2,Yes,None,1
+P003,52,Male,Heart Disease,Atorvastatin,20,240,Improved,125/80,185,110,24.8,No,None,4
+P004,38,Female,Diabetes,Metformin,1000,90,Deteriorated,140/90,225,178,33.1,No,Heavy,0
+P005,71,Male,COPD,Salbutamol,100,365,Stable,135/88,195,,26.3,Yes,None,1
+P006,29,Female,Asthma,Budesonide,200,120,Improved,118/75,165,92,22.1,No,None,5
+P007,55,Male,Hypertension,Amlodipine,5,200,Improved,138/88,200,105,28.9,No,Occasional,2
+P008,63,Female,Diabetes,Insulin,40,365,Stable,142/90,215,160,30.5,No,None,2
+P009,48,Male,Heart Disease,Metoprolol,50,180,Improved,128/82,190,115,25.7,No,None,3
+P010,76,Female,COPD,,100,300,Deteriorated,150/95,220,,35.2,Yes,None,0
+P011,33,Male,Asthma,Montelukast,10,60,Improved,115/72,155,88,21.8,No,None,6
+P012,59,Female,Hypertension,Losartan,50,365,Stable,140/90,205,120,29.4,No,Occasional,2
+P013,44,Male,Diabetes,Glipizide,5,150,Improved,132/84,198,135,26.8,No,None,4
+P014,82,Female,Heart Disease,Digoxin,0.25,365,Stable,148/94,230,108,27.1,Yes,None,0
+P015,37,Male,Asthma,Salbutamol,200,90,Improved,120/76,160,95,23.4,No,None,5
+P016,61,Female,Diabetes,,500,120,Deteriorated,145/92,218,170,32.7,No,Heavy,1
+P017,54,Male,COPD,Tiotropium,18,365,Stable,136/86,195,112,27.9,Yes,None,1
+P018,28,Female,Hypertension,Hydrochlorothiazide,25,180,Improved,128/80,170,90,21.5,No,None,4
+P019,69,Male,Heart Disease,Warfarin,5,365,Stable,140/88,210,118,26.4,No,None,2
+P020,43,Female,Diabetes,Metformin,750,200,Improved,130/82,192,130,25.9,No,Occasional,3
+P021,57,Male,Hypertension,Verapamil,120,250,Stable,142/90,202,108,29.1,No,None,2
+P022,35,Female,Asthma,Fluticasone,100,150,Improved,116/73,158,91,22.7,No,None,5
+P023,72,Male,COPD,Formoterol,12,365,Deteriorated,155/98,225,,36.1,Yes,None,0
+P024,49,Female,Heart Disease,Aspirin,100,365,Improved,126/80,188,112,24.5,No,None,4
+P025,66,Male,Diabetes,Insulin,60,365,Stable,148/94,220,165,31.8,No,None,1
+P026,41,Female,Hypertension,Enalapril,10,180,Improved,130/84,175,95,23.8,No,None,4
+P027,78,Male,Heart Disease,Atorvastatin,40,300,Stable,145/92,200,115,28.2,Yes,None,1
+P028,32,Female,Asthma,,200,45,Deteriorated,122/78,162,93,23.1,No,Occasional,2
+P029,53,Male,Diabetes,Metformin,1000,365,Improved,133/85,195,138,26.5,No,None,3
+P030,67,Female,COPD,Budesonide,400,365,Stable,138/88,205,120,28.8,Yes,None,1
+P031,46,Male,Hypertension,Bisoprolol,5,200,Improved,132/84,188,102,25.3,No,None,3
+P032,60,Female,Diabetes,Sitagliptin,100,180,Improved,136/86,200,142,28.1,No,None,3
+P033,74,Male,Heart Disease,Clopidogrel,75,365,Stable,148/94,215,110,27.4,Yes,None,1
+P034,39,Female,Asthma,Montelukast,10,120,Improved,118/74,160,90,22.3,No,None,5
+P035,56,Male,COPD,Salbutamol,200,365,Deteriorated,152/96,222,,34.5,Yes,Heavy,0
+P036,50,Female,Hypertension,Amlodipine,10,300,Stable,138/88,198,108,27.6,No,Occasional,2
+P037,65,Male,Diabetes,Glipizide,10,240,Stable,144/90,210,155,30.2,No,None,2
+P038,31,Female,Heart Disease,Aspirin,75,180,Improved,120/76,165,92,21.9,No,None,5
+P039,58,Male,Asthma,Fluticasone,200,200,Stable,126/80,178,100,25.8,No,None,3
+P040,70,Female,COPD,,100,300,Deteriorated,158/100,228,,37.2,Yes,None,0
