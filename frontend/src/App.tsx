@@ -21,7 +21,7 @@ function App() {
     formData.append('file', file);
     try {
       console.log('Uploading file:', file.name);
-      const API_URL = import.meta.env.VITE_API_URL;
+      const API_URL = import.meta.env.VITE_API_URL || '';
 
       const response = await fetch(`${API_URL}/api/upload/`, {
         method: 'POST',

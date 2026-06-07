@@ -46,7 +46,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ sessionId }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/agent/ask', {
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_URL}/api/agent/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

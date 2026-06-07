@@ -33,8 +33,9 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ sessionId }) => {
         age_group: ageGroupOverride !== undefined ? (ageGroupOverride || undefined) : (selectedAgeGroup || undefined),
       };
       
+      const API_URL = import.meta.env.VITE_API_URL || '';
       console.log('Sending cohort request:', filters);
-      const response = await fetch('/api/cohort/create', {
+      const response = await fetch(`${API_URL}/api/cohort/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(filters),
@@ -62,11 +63,12 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ sessionId }) => {
     
     const fetchFilters = async () => {
       console.log('Fetching filters for session:', sessionId);
+      const API_URL = import.meta.env.VITE_API_URL || '';
       try {
         const [dRes, mRes, oRes] = await Promise.all([
-          fetch(`/api/cohort/diseases/${sessionId}`),
-          fetch(`/api/cohort/medications/${sessionId}`),
-          fetch(`/api/cohort/outcomes/${sessionId}`)
+          fetch(`${API_URL}/api/cohort/diseases/${sessionId}`),
+          fetch(`${API_URL}/api/cohort/medications/${sessionId}`),
+          fetch(`${API_URL}/api/cohort/outcomes/${sessionId}`)
         ]);
         
         const dData = dRes.ok ? await dRes.json() : { diseases: [] };
@@ -86,8 +88,9 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ sessionId }) => {
 
   const fetchInsights = async (cohortName: string) => {
     setLoadingInsights(true);
+    const API_URL = import.meta.env.VITE_API_URL || '';
     try {
-      const response = await fetch('/api/insights/generate', {
+      const response = await fetch(`${API_URL}/api/insights/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -27,7 +27,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:3000",
-        "https://clinical-cohort-01-nd45.vercel.app"
+        "https://clinical-cohort-01-nd45.vercel.app",
+        "https://clinical-cohort-01-nd45-bdjh6kuzo-kushal-khawas-projects.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
