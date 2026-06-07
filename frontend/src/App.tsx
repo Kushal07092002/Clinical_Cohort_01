@@ -21,7 +21,12 @@ function App() {
     formData.append('file', file);
     try {
       console.log('Uploading file:', file.name);
-      const response = await fetch('/api/upload/', { method: 'POST', body: formData });
+      const API_URL = import.meta.env.VITE_API_URL;
+
+      const response = await fetch(`${API_URL}/api/upload/`, {
+        method: 'POST',
+        body: formData
+      });
       if (!response.ok) {
         const errData = await response.json().catch(() => ({ detail: 'Unknown error' }));
         throw new Error(errData.detail || 'Upload failed');
@@ -56,8 +61,8 @@ function App() {
                   {session.filename}
                 </span>
               </div>
-              <button 
-                onClick={() => {setSession(null); setFile(null);}}
+              <button
+                onClick={() => { setSession(null); setFile(null); }}
                 className="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors uppercase tracking-widest"
               >
                 Reset
@@ -79,19 +84,19 @@ function App() {
               </p>
             </div>
 
-            <div 
+            <div
               onClick={() => fileInputRef.current?.click()}
               className={`group relative border-2 border-dashed rounded-3xl p-20 transition-all cursor-pointer bg-white
                 ${file ? 'border-blue-400 bg-blue-50/20 shadow-inner' : 'border-slate-200 hover:border-blue-400 hover:bg-slate-50/50'}`}
             >
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".csv" />
-              
+
               <div className="flex flex-col items-center">
                 <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-8 transition-all duration-300 group-hover:scale-105 group-hover:rotate-3
                   ${file ? 'bg-blue-600 text-white shadow-xl shadow-blue-200' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
                   {file ? <FileText className="w-10 h-10" /> : <Upload className="w-10 h-10" />}
                 </div>
-                
+
                 <h3 className="text-xl font-bold text-slate-800 mb-2">
                   {file ? file.name : 'Choose a clinical dataset'}
                 </h3>
@@ -102,7 +107,7 @@ function App() {
             </div>
 
             {file && (
-              <button 
+              <button
                 onClick={handleUpload}
                 disabled={uploading}
                 className="w-full mt-10 btn-primary h-14 text-lg font-bold shadow-xl shadow-blue-500/20"
@@ -110,7 +115,7 @@ function App() {
                 {uploading ? 'Processing Dataset...' : 'Begin Analysis'}
               </button>
             )}
-            
+
             <div className="mt-24 flex items-center justify-center gap-12 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
               <div className="flex flex-col items-center gap-3">
                 <Layers className="w-6 h-6" />
@@ -151,7 +156,7 @@ function App() {
           </div>
         )}
       </main>
-      
+
       <footer className="py-20 text-center">
         <div className="flex items-center justify-center gap-2 mb-4 opacity-20">
           <Activity className="w-4 h-4" />
