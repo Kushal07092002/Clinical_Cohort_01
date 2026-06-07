@@ -24,12 +24,15 @@ app = FastAPI(
 # ─── CORS ──────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://clinical-cohort-01-nd45.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # ─── Ensure upload directory exists ───────────────────────────────────────────
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./data/uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
